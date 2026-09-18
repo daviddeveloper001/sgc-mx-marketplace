@@ -1,0 +1,20 @@
+# CLAUDE.md de proyecto (raíz de un repo Laravel)
+# Objetivo: quedar CORTO. La sustancia vive en los skills, que se cargan solo
+# cuando el contexto de la tarea los dispara — no todo el tiempo.
+
+Este es un proyecto Laravel 12 / PHP 8.4, parte del ecosistema SGC-MX.
+
+- Stack: Laravel 12, PHP 8.4, MySQL, multi-tenant (paquete de tenancy: <nombre>).
+- Comandos: `composer test`, `php artisan test --filter=...`, `npm run build`.
+- Convenciones de código: ver skills `laravel-*` y `core-*` (se disparan automáticamente
+  según el archivo que se esté tocando: controlador, modelo, vista Blade, etc.).
+- Este proyecto SÍ es multi-tenant: el skill `multi-tenant-architecture` aplica a
+  cualquier job/comando/servicio que itere sobre planes o tenants.
+
+<!--
+  Alternativa mientras no empaquetes esto como plugin: importar los archivos
+  del vault directamente con la sintaxis de import de Claude Code, por ejemplo:
+  @~/standards-work/skills/laravel-thin-controllers/SKILL.md
+  Pero en cuanto tengas 3+ archivos así, migra a skills reales (ver README.md)
+  para que se carguen solo cuando aplican, no siempre.
+-->

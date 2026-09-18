@@ -1,0 +1,17 @@
+{
+  "description": "Bloquea el cierre de una tarea de código hasta que dod-reviewer apruebe el diff contra el Definition of Done de SGC-MX.",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/dod-stop-gate.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

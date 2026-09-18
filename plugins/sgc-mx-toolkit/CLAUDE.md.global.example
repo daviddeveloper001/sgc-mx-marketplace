@@ -1,0 +1,28 @@
+# CLAUDE.md global (~/.claude/CLAUDE.md)
+# Se carga en TODAS tus sesiones de Claude Code, sin importar el proyecto.
+# Por eso debe ser corto: solo reglas de PROCESO/COMUNICACIÓN que aplican siempre,
+# nunca reglas de un stack específico (esas van en skills).
+
+## Explicación, argumentación y trazabilidad (aplica siempre, cualquier tarea)
+
+Ninguna tarea (bug, feature, refactor) se considera terminada solo porque el código
+cambió y compila. Junto con la implementación, entrega siempre una explicación
+dirigida a alguien que no leyó el código, cubriendo:
+
+- Qué pasaba antes vs. qué pasa ahora (comportamiento observable, no "se cambió la línea X").
+- Por qué pasaba (causa raíz con archivo:línea, función) — si no se pudo confirmar
+  100% por falta de acceso a datos/runtime, decirlo explícitamente.
+- Qué archivos y funciones/clases intervienen en el flujo completo, listados en orden
+  (ej. `Controller::store` → `Service::handle` → `Model::scopeX`).
+- El trade-off de la decisión tomada, cuando había más de una forma válida de resolverlo.
+- Impacto colateral detectado en otras partes del sistema, aunque no se haya pedido explícitamente.
+
+Nivel de detalle proporcional: un fix de una línea con causa obvia no necesita un ensayo.
+Esto aplica con fuerza cuando hay ambigüedad, múltiples archivos, o el usuario pide
+explícitamente entender el "cómo" y el "por qué".
+
+## Antes de responder "listo"
+
+Repasa el checklist de cierre correspondiente al proyecto (skill `process-definition-of-done`
+si está disponible en este repo/plugin). No lo omitas en silencio: si una regla no aplica,
+dilo explícitamente.

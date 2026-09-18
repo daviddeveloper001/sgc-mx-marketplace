@@ -1,0 +1,9 @@
+{
+  "name": "sgc-mx-toolkit",
+  "description": "Estándares de arquitectura de SGC-MX como skills auto-disparadas (core + Laravel + multi-tenant), más el subagente dod-reviewer y el hook que bloquea el cierre de una tarea hasta que el diff pase el Definition of Done.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Deivy Potosi"
+  },
+  "keywords": ["laravel", "nestjs", "ddd", "solid", "definition-of-done", "code-review"]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "sgc-mx",
+  "owner": {
+    "name": "Deivy Potosi"
+  },
+  "plugins": [
+    {
+      "name": "sgc-mx-toolkit",
+      "source": "./plugins/sgc-mx-toolkit",
+      "description": "Estándares SGC-MX (core + Laravel + multi-tenant) como skills, subagente dod-reviewer y hook de cierre automático."
+    }
+  ]
+}
