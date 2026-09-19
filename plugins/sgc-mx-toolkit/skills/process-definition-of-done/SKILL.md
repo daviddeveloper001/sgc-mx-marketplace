@@ -33,4 +33,12 @@ Ninguna implementación se declara terminada solo porque el código corre. Antes
 
 Si al repasar esta lista se detecta un incumplimiento, corrígelo antes de responder — no lo reportes como pendiente salvo que el usuario haya limitado explícitamente el alcance de la tarea.
 
-> Nota de evolución: este checklist es candidato a convertirse en un subagente de verificación automática (`dod-reviewer`) disparado por un hook al cerrar cada tarea, en vez de depender de que el modelo principal se acuerde de repasarlo. Ese es el siguiente nivel del sistema, no lo resuelve este skill por sí solo.
+## Registro de la aprobación
+
+Si vas a dar la tarea por cerrada y ya repasaste esta lista completa sin incumplimientos pendientes (o corregiste los que encontraste), ejecuta con Bash el script `dod-mark-approved.sh`. La ruta exacta a ese script viene siempre en el mensaje de bloqueo que generó `dod-stop-gate.sh` (línea `bash "/ruta/absoluta/.../dod-mark-approved.sh"`) — usa esa ruta literal, no la adivines ni la reconstruyas, porque cambia según si el toolkit está instalado como plugin o copiado a mano en `.claude/hooks/`.
+
+Esto registra el hash del diff actual como revisado, para que el hook `dod-stop-gate.sh` deje cerrar la tarea sin depender de su válvula de escape por intentos agotados. Si detectaste incumplimientos y no los corregiste (por ejemplo, porque el usuario limitó el alcance), NO ejecutes ese script — deja que el hook vuelva a bloquear.
+
+Este paso aplica sin importar el stack: es el mismo mecanismo que usa el subagente `dod-reviewer` para Laravel. Si el proyecto es Laravel y `dod-reviewer` está disponible, prefiere invocarlo a él en vez de esta skill — tiene un checklist más específico y un veredicto PASS/FAIL explícito por punto. Usa esta skill genérica cuando el stack no tiene todavía su propio subagente de revisión (por ejemplo, NestJS por ahora).
+
+> Nota de evolución: este checklist es candidato a convertirse en un subagente de verificación automática por stack (equivalente a `dod-reviewer` pero para NestJS u otros), en vez de depender de que el modelo principal se acuerde de repasarlo. Ese es el siguiente nivel del sistema, no lo resuelve este skill por sí solo.
