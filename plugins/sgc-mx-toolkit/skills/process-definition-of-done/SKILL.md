@@ -21,6 +21,15 @@ Ninguna implementación se declara terminada solo porque el código corre. Antes
 12. **Edge cases** — ¿errores externos, respuestas vacías/nulas, datos parciales, bordes? (`core-edge-case-analysis`)
 13. **Explicación al usuario** — ¿la respuesta indica qué pasaba antes vs. ahora, causa raíz con archivo:línea, el recorrido de archivos/funciones, y el trade-off de la decisión tomada?
 14. **Multi-tenant** — si el cambio toca más de un tenant: ¿se encola por tenant, es idempotente, y el test cubre más de uno? (`multi-tenant-architecture`)
+15. **Form Requests** — ¿toda validación de entrada usa un Form Request dedicado con `messages()` personalizado (nunca inline ni mensajes por defecto)? (`laravel-form-requests`)
+16. **Resources de API** — ¿toda respuesta de API se formatea con una clase Resource (`type`/`id`/`attributes`/`includes`/`links`), nunca el modelo o un array armado a mano? (`laravel-api-resources`)
+17. **Controlador base de API** — ¿el controlador extiende `ApiControllerV1`, usa `ApiResponses` para responder, y delega errores a `handleException()` (con `saveErrorLog`, no `Log::error`)? (`laravel-api-controllers`)
+18. **Filters de API** — ¿el listado usa un `QueryFilter` concreto tipado en la firma, con `$sortable` como allowlist de orden? (`laravel-api-filters`)
+19. **Repositories** — ¿el CRUD puntual de un registro pasa por un Repository que extiende `BaseRepositoryV1`, no por queries directas en el Service? (`laravel-api-repositories`)
+20. **Services de API** — ¿el Service orquesta Repository (CRUD puntual) y scope de modelo (listados filtrados), y traduce toda excepción atrapada a una excepción de dominio? (`laravel-api-services`)
+21. **Excepciones de dominio API** — ¿la excepción implementa `ApiRenderableExceptionV1` y se construye siempre con argumentos nombrados? (`laravel-api-exceptions`)
+22. **Migraciones** — ¿foreign keys con `onDelete()` explícito y justificado, índices evaluados, soft deletes evaluado? (`laravel-migrations`)
+23. **Modelos Eloquent** — ¿`$fillable` explícito, `$casts` completo, y `SoftDeletes` sincronizado con la migración? (`laravel-eloquent-models`)
 
 Si al repasar esta lista se detecta un incumplimiento, corrígelo antes de responder — no lo reportes como pendiente salvo que el usuario haya limitado explícitamente el alcance de la tarea.
 
