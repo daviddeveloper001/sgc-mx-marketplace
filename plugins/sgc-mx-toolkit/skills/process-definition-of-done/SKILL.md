@@ -7,6 +7,19 @@ description: Usar antes de responder "listo" o entregar cualquier resultado de c
 
 Ninguna implementación se declara terminada solo porque el código corre. Antes de responder "listo", repasa explícitamente — uno por uno — estos puntos contra el `git diff` real de los archivos tocados. Si una regla no aplica a esta tarea, dilo explícitamente ("N/A: no hay controladores en este cambio"); no la omitas en silencio.
 
+Si el proyecto es Laravel y tiene disponible el subagente `dod-reviewer` (o
+su variante `dod-reviewer-lite` para diffs pequeños sin rutas sensibles),
+prefiere invocarlo a él — el hook `dod-stop-gate.sh` ya calcula qué puntos
+son mecánicamente N/A según los archivos tocados, así que ninguno de los dos
+necesita "investigar hasta lo obviamente inaplicable": un punto sin sus
+archivos disparadores en el diff se marca N/A directo, con la razón que da
+el propio hook. El escepticismo ("nunca un PASS optimista") se reserva para
+los puntos que sí están vivos, no para demostrar de más que algo no aplica.
+Usa esta skill genérica cuando el stack no tiene todavía su propio subagente
+de revisión (por ejemplo, NestJS por ahora) — el mismo criterio de "un punto
+sin archivos que lo disparen es N/A directo" aplica igual repasando la lista
+a mano.
+
 1. **Controladores** — ¿delgados, sin lógica de negocio ni queries? (`core-clean-architecture`, `laravel-thin-controllers`)
 2. **Queries** — ¿toda consulta compleja vive en el modelo, no en controlador/servicio? (`laravel-eloquent-encapsulation`)
 3. **Textos** — ¿cada string visible pasa por `__()`/`@lang()` con su entrada en `lang/*/...php`? (`laravel-i18n`)
@@ -42,4 +55,4 @@ Esto registra el hash del diff actual como revisado, para que el hook `dod-stop-
 
 Este paso aplica sin importar el stack: es el mismo mecanismo que usa el subagente `dod-reviewer` para Laravel. Si el proyecto es Laravel y `dod-reviewer` está disponible, prefiere invocarlo a él en vez de esta skill — tiene un checklist más específico y un veredicto PASS/FAIL explícito por punto. Usa esta skill genérica cuando el stack no tiene todavía su propio subagente de revisión (por ejemplo, NestJS por ahora).
 
-> Nota de evolución: este checklist es candidato a convertirse en un subagente de verificación automática por stack (equivalente a `dod-reviewer` pero para NestJS u otros), en vez de depender de que el modelo principal se acuerde de repasarlo. Ese es el siguiente nivel del sistema, no lo resuelve este skill por sí solo.
+> Nota de evolución: este checklist es candidato a convertirse en un subagente de verificación automática por stack (equivalente a `dod-reviewer`/`dod-reviewer-lite` pero para NestJS u otros), en vez de depender de que el modelo principal se acuerde de repasarlo. Ese es el siguiente nivel del sistema, no lo resuelve este skill por sí solo.

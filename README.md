@@ -2,7 +2,7 @@
 
 Este repo es una **marketplace de Claude Code** con un solo plugin,
 `sgc-mx-toolkit`: los 31 skills de estándares SGC-MX (core + Laravel + NestJS) (core + Laravel +
-multi-tenant), el subagente `dod-reviewer`, y el hook que bloquea el cierre
+multi-tenant), los subagentes `dod-reviewer`/`dod-reviewer-lite`, y el hook que bloquea el cierre
 de una tarea hasta que el diff pasa el Definition of Done.
 
 Es la evolución de dos entregas anteriores (`sgc-mx-skills.zip`, entregado
@@ -21,7 +21,8 @@ sgc-mx-marketplace/
         │   └── plugin.json       # metadata del plugin
         ├── skills/                # los 31 skills (ver detalle abajo)
         ├── agents/
-        │   └── dod-reviewer.md
+        │   ├── dod-reviewer.md
+        │   └── dod-reviewer-lite.md
         ├── hooks/
         │   ├── hooks.json         # declara el hook Stop
         │   ├── dod-stop-gate.sh
@@ -55,7 +56,7 @@ hacés commit + push una vez, y en cada máquina corrés:
 /plugin marketplace update
 ```
 
-Con eso se actualizan skills, agente y hooks a la vez — ya no hay que copiar
+Con eso se actualizan skills, agentes y hooks a la vez — ya no hay que copiar
 carpetas a mano ni recompilar nada (a diferencia del servidor MCP en
 TypeScript de la propuesta original).
 
@@ -69,10 +70,22 @@ TypeScript de la propuesta original).
 - **`dod-reviewer`**: subagente de solo lectura que verifica el diff real
   contra los 24 puntos del checklist, citando `archivo:línea`, antes de dar
   una tarea por terminada.
-- **Hook `Stop`**: bloquea el cierre de la tarea hasta que `dod-reviewer`
-  registre una aprobación para el diff vigente (máximo 2 intentos de
-  bloqueo por diff — al tercero deja pasar con una advertencia, para nunca
-  generar un loop infinito).
+- **`dod-reviewer-lite`**: misma verificación, mismo formato auditable de 24
+  puntos, pero pensada para diffs chicos que no tocan ninguna ruta sensible
+  (sin controlador, migración, modelo, ecosistema de API, Form Request,
+  Job/Command, ni un `catch` nuevo) — menos skills precargados y modelo más
+  rápido. El hook decide cuál de los dos invocar, nunca lo decide el modelo
+  principal por su cuenta.
+- **Hook `Stop`**: bloquea el cierre de la tarea hasta que `dod-reviewer` (o
+  `dod-reviewer-lite`) registre una aprobación para el diff vigente (máximo
+  2 intentos de bloqueo por diff — al tercero deja pasar con una
+  advertencia, para nunca generar un loop infinito). Desde v0.7.0, el hook
+  también hace un **pre-filtrado mecánico**: mira qué archivos cambiaron y
+  descarta en el propio mensaje de bloqueo los puntos del checklist que no
+  pueden aplicar (ej. sin `.blade.php` en el diff, el punto 5 ya viene N/A),
+  para que el subagente no tenga que investigar por su cuenta lo obviamente
+  inaplicable. Los puntos agnósticos de stack (2, 6, 7, 8, 9, 10, 11, 12, 13,
+  24) nunca se descartan así — siempre se evalúan a fondo.
 - **Dos `CLAUDE.md` de ejemplo**: uno global corto (regla de explicación y
   trazabilidad, que debe aplicar siempre) y uno de proyecto Laravel
   (referencia a que el plugin ya trae las convenciones).
@@ -106,17 +119,30 @@ se encontraron y corrigieron dos bugs reales antes de esta entrega:
 - El hash del diff se arma con `git diff HEAD` + `git status --porcelain`.
   Un archivo nuevo aún no trackeado (`git add`) no entra al hash por su
   contenido hasta que lo agregues al índice — recomendación: `git add -A`
-  antes de pedir el cierre de la tarea.
+  antes de pedir el cierre de la tarea. El pre-filtrado mecánico (qué
+  archivos cambiaron) tiene la misma dependencia.
 - Requiere que el proyecto sea un repo git; si no lo es, el hook se
   desactiva solo (no bloquea nada).
 - La skill `multi-tenant-architecture` asume el patrón de tenancy descrito
   en la regla 14 original; si tu paquete de tenancy usa otra API, ajustá
   esa skill puntual.
+- El pre-filtrado mecánico usa rutas de convención estándar de Laravel
+  (`Http/Controllers/`, `app/Models/`, `database/migrations/`, etc.). Si tu
+  proyecto usa una estructura de carpetas muy distinta, algunos puntos
+  podrían quedar mal clasificados como N/A — revisá los patrones `grep -E`
+  al inicio de `dod-stop-gate.sh` (sección "pre-filtrado mecánico") y
+  ajustalos a tu convención real antes de confiar el 100% en el atajo.
+- Los umbrales de "diff pequeño" para `dod-reviewer-lite` (`LINE_THRESHOLD`,
+  `FILE_THRESHOLD` en `dod-stop-gate.sh`) son un punto de partida arbitrario,
+  no un dato medido — ajustalos si en la práctica ves diffs mal clasificados.
 
 ## Pendiente (no incluido en esta entrega)
 
 - `skills/nestjs-*` — convenciones de NestJS (falta que las definas, igual
   que hiciste con Laravel).
+- Integrar el pre-filtrado mecánico y `dod-reviewer-lite` al flujo genérico
+  de `process-definition-of-done` (hoy solo el hook de Laravel lo hace;
+  NestJS y otros stacks sin subagente propio siguen sin ese atajo).
 - Un hook `PostToolUse` liviano (heurísticas grep o Larastan/PHP-CS-Fixer)
   para atrapar lo mecánico sin gastar una pasada completa de `dod-reviewer`
   en cada guardado.
