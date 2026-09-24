@@ -1,7 +1,7 @@
 # sgc-mx — marketplace personal de Claude Code
 
 Este repo es una **marketplace de Claude Code** con un solo plugin,
-`sgc-mx-toolkit`: los 30 skills de estándares SGC-MX (core + Laravel + NestJS) (core + Laravel +
+`sgc-mx-toolkit`: los 31 skills de estándares SGC-MX (core + Laravel + NestJS) (core + Laravel +
 multi-tenant), el subagente `dod-reviewer`, y el hook que bloquea el cierre
 de una tarea hasta que el diff pasa el Definition of Done.
 
@@ -19,7 +19,7 @@ sgc-mx-marketplace/
     └── sgc-mx-toolkit/
         ├── .claude-plugin/
         │   └── plugin.json       # metadata del plugin
-        ├── skills/                # los 30 skills (ver detalle abajo)
+        ├── skills/                # los 31 skills (ver detalle abajo)
         ├── agents/
         │   └── dod-reviewer.md
         ├── hooks/
@@ -61,13 +61,13 @@ TypeScript de la propuesta original).
 
 ## Qué trae el plugin
 
-- **30 skills** organizados en `core-*` (agnósticos de stack), `laravel-*`, y ahora `nestjs-*`
+- **31 skills** organizados en `core-*` (agnósticos de stack), `laravel-*`, y ahora `nestjs-*`
   (convenciones de Laravel/PHP), `multi-tenant-architecture` (específico de
   que este SaaS es multi-tenant) y `process-definition-of-done` (el
   checklist de cierre). Se disparan solos según la `description` de cada
   uno — no hace falta mencionarlos.
 - **`dod-reviewer`**: subagente de solo lectura que verifica el diff real
-  contra los 23 puntos del checklist, citando `archivo:línea`, antes de dar
+  contra los 24 puntos del checklist, citando `archivo:línea`, antes de dar
   una tarea por terminada.
 - **Hook `Stop`**: bloquea el cierre de la tarea hasta que `dod-reviewer`
   registre una aprobación para el diff vigente (máximo 2 intentos de

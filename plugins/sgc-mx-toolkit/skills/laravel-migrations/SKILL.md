@@ -1,6 +1,6 @@
 ---
 name: laravel-migrations
-description: Usar siempre que se cree o modifique una migración de Laravel — exige índices donde corresponda, evaluar explícitamente la necesidad de soft deletes, y foreign keys con onDelete() explícito (cascade/set null/restrict) justificado según el caso de negocio.
+description: Usar siempre que se cree o modifique una migración de Laravel — exige índices donde corresponda, evaluar explícitamente la necesidad de soft deletes, foreign keys con onDelete() explícito (cascade/set null/restrict) justificado según el caso de negocio, y created_at/updated_at siempre como últimas columnas.
 ---
 
 # Estructura de migraciones (Laravel)
@@ -15,6 +15,7 @@ description: Usar siempre que se cree o modifique una migración de Laravel — 
   - La justificación de por qué se eligió una u otra va en la explicación al usuario (punto 13 del checklist — causa raíz/trade-off de la decisión), no solo en el código.
 - **Índices**: se evalúa explícitamente (no por omisión) si cada columna nueva usada en `WHERE`, `ORDER BY`, `JOIN` o unicidad de negocio necesita `->index()` o `->unique()`. Las columnas de foreign key ya quedan indexadas automáticamente por `constrained()`, no hace falta duplicarlo.
 - **Soft deletes**: se evalúa explícitamente si la tabla necesita borrado lógico (`$table->softDeletes()`) — típicamente cuando el registro puede tener referencias históricas que no deben desaparecer (ej. una `Category` referenciada en reportes o `products` ya vendidos), y no aplica cuando el registro es efímero o no tiene relaciones dependientes relevantes. Si se agrega `softDeletes()` en la migración, el Modelo correspondiente **debe** usar el trait `SoftDeletes` (ver `laravel-eloquent-models`) — y viceversa: un Modelo con `SoftDeletes` exige la columna en la migración.
+- **Orden de columnas: `created_at`/`updated_at` siempre al final**: `$table->timestamps()` (o las columnas `created_at`/`updated_at` declaradas a mano) va siempre como lo último del bloque de columnas de la tabla — nunca en medio ni al principio. Si se agrega una columna nueva a una tabla ya existente, esa columna se declara **antes** de `timestamps()`, nunca después. Esto es una convención de orden de columnas, no de sintaxis de Laravel — aplica igual sin importar el stack o el motor de migraciones.
 
 ## Ejemplo de referencia
 
@@ -27,7 +28,7 @@ Schema::create('products', function (Blueprint $table) {
     $table->foreignId('assigned_user_id')->nullable()->constrained('users')->onDelete('set null');
     $table->unique(['category_id', 'name']);
     $table->softDeletes();
-    $table->timestamps();
+    $table->timestamps(); // siempre al final — cualquier columna nueva va antes de esta línea
 });
 ```
 
@@ -37,9 +38,11 @@ Schema::create('products', function (Blueprint $table) {
 - Una foreign key con `onDelete('set null')` sobre una columna que no es `nullable()` — falla en el primer borrado del padre.
 - Una tabla que en la práctica necesita borrado lógico (referenciada por otras tablas con reportes/históricos) sin `softDeletes()`, o un Modelo con `SoftDeletes` cuya migración no tiene la columna `deleted_at`.
 - Una columna usada en filtros frecuentes (`WHERE status = ...`, `WHERE tenant_id = ...`) sin índice.
+- Una migración que agrega una columna nueva a una tabla existente **después** de `$table->timestamps()`, dejando los campos de auditoría en medio de la tabla en vez de al final.
 
 ## Checklist rápido
 - ¿Toda foreign key usa `foreignId()->constrained()` (o `foreignIdFor()`) con `onDelete()` explícito?
 - ¿La elección de `cascade`/`set null`/`restrict` está justificada según el caso de negocio, y si es `set null` la columna es `nullable()`?
 - ¿Se evaluaron índices en columnas de filtro/orden/unicidad de negocio?
 - ¿Se evaluó explícitamente si la tabla necesita `softDeletes()`, y coincide con lo que declara el Modelo?
+- ¿`created_at`/`updated_at` (`timestamps()`) quedan como las últimas columnas declaradas, y cualquier columna nueva se agregó antes de ellas, nunca después?

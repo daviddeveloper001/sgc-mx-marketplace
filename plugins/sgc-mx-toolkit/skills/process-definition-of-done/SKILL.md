@@ -13,7 +13,7 @@ Ninguna implementación se declara terminada solo porque el código corre. Antes
 4. **Errores** — ¿los `catch` usan `App\Traits\Error::saveErrorLog`? (`laravel-error-logging`)
 5. **Blade** — ¿sin `<script>`/`<style>` inline ni lógica compleja? (`laravel-blade-views`)
 6. **Magic strings/numbers** — ¿todo literal de estado/rol/tipo usa Enum o constante? (`core-zero-magic-values`)
-7. **PHP/Laravel moderno** — ¿tipado estricto y sintaxis PHP 8.4/Laravel 12? (`laravel-modern-syntax`)
+7. **PHP/Laravel moderno** — ¿tipado estricto, sintaxis PHP 8.4/Laravel 12, y toda dependencia inyectada por constructor (nunca instanciada con `new` dentro de un método)? (`laravel-modern-syntax`)
 8. **Impacto** — ¿se buscó en todo el proyecto dónde más se usa cada estructura modificada? (`core-impact-analysis`)
 9. **Configuración dinámica** — ¿ningún valor operativo quedó quemado en código/`config`? (`core-config-zero-deploy`)
 10. **Patrones de diseño** — ¿se evitó acumular `if/else`/`switch` para variantes que van a crecer? (`core-design-patterns-ocp`)
@@ -28,8 +28,9 @@ Ninguna implementación se declara terminada solo porque el código corre. Antes
 19. **Repositories** — ¿el CRUD puntual de un registro pasa por un Repository que extiende `BaseRepositoryV1`, no por queries directas en el Service? (`laravel-api-repositories`)
 20. **Services de API** — ¿el Service orquesta Repository (CRUD puntual) y scope de modelo (listados filtrados), y traduce toda excepción atrapada a una excepción de dominio? (`laravel-api-services`)
 21. **Excepciones de dominio API** — ¿la excepción implementa `ApiRenderableExceptionV1` y se construye siempre con argumentos nombrados? (`laravel-api-exceptions`)
-22. **Migraciones** — ¿foreign keys con `onDelete()` explícito y justificado, índices evaluados, soft deletes evaluado? (`laravel-migrations`)
+22. **Migraciones** — ¿foreign keys con `onDelete()` explícito y justificado, índices evaluados, soft deletes evaluado, y `created_at`/`updated_at` como últimas columnas (cualquier campo nuevo declarado antes de ellas, nunca después)? (`laravel-migrations`)
 23. **Modelos Eloquent** — ¿`$fillable` explícito, `$casts` completo, y `SoftDeletes` sincronizado con la migración? (`laravel-eloquent-models`)
+24. **Tamaño de funciones y clases** — ¿ninguna función/método tocado supera 4 `return`, y ninguna clase tocada supera 20 métodos? (`core-function-class-size`)
 
 Si al repasar esta lista se detecta un incumplimiento, corrígelo antes de responder — no lo reportes como pendiente salvo que el usuario haya limitado explícitamente el alcance de la tarea.
 
