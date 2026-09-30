@@ -5,7 +5,7 @@ en plugins por stack:
 
 | Plugin | Qué trae | Dónde instalarlo |
 |---|---|---|
-| `sgc-core` | 8 skills `core-*` agnósticas + `process-definition-of-done` (checklist CORE-*), el revisor `sgc-core:dod-reviewer` y **el único hook de cierre** (`dod-stop-gate`) | Todo repo (los plugins de stack lo instalan solos) |
+| `sgc-core` | 10 skills `core-*` agnósticas + `process-definition-of-done` (checklist CORE-*), el revisor `sgc-core:dod-reviewer` y **el único hook de cierre** (`dod-stop-gate`) | Todo repo (los plugins de stack lo instalan solos) |
 | `sgc-laravel` | 16 skills `laravel-*` + `multi-tenant-architecture` + `laravel-definition-of-done` (LAR-*), revisores `sgc-laravel:dod-reviewer` y `dod-reviewer-lite`, módulo de cierre Laravel | Repos Laravel |
 | `sgc-nestjs` | 6 skills `nestjs-*` + `nestjs-definition-of-done` (NEST-*), revisor `sgc-nestjs:dod-reviewer`, módulo de cierre NestJS | Repos NestJS |
 
@@ -103,7 +103,7 @@ existen en cada repo.
 
 El checklist tiene dos capas, con IDs por módulo:
 
-- **CORE-1…CORE-9** (`sgc-core`): agnósticos, siempre vivos, en cualquier stack.
+- **CORE-1…CORE-11** (`sgc-core`): agnósticos, siempre vivos, en cualquier stack.
 - **LAR-1…LAR-16** (`sgc-laravel`) y **NEST-1…NEST-6** (`sgc-nestjs`): se suman
   cuando el diff toca el stack de ese módulo.
 

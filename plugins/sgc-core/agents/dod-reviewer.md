@@ -1,6 +1,6 @@
 ---
 name: dod-reviewer
-description: Revisor de cierre (Definition of Done) agnóstico de stack. Verifica el diff contra los puntos CORE-1…CORE-9 (puntos de entrada delgados, magic values, impacto, configuración dinámica, patrones, N+1, edge cases, explicación al usuario, tamaño de funciones y clases). Invocar cuando el mensaje de bloqueo de dod-stop-gate (sgc-core) indique "sgc-core:dod-reviewer", es decir, cuando ningún módulo de stack (Laravel, NestJS…) aplica al diff. Si el gate indica el revisor de un módulo, usa ese en su lugar.
+description: Revisor de cierre (Definition of Done) agnóstico de stack. Verifica el diff contra los puntos CORE-1…CORE-11 (puntos de entrada delgados, magic values, impacto, configuración dinámica, patrones, N+1, edge cases, explicación al usuario, tamaño de funciones y clases, tests con mocks sin BD, índices en migraciones). Invocar cuando el mensaje de bloqueo de dod-stop-gate (sgc-core) indique "sgc-core:dod-reviewer", es decir, cuando ningún módulo de stack (Laravel, NestJS…) aplica al diff. Si el gate indica el revisor de un módulo, usa ese en su lugar.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 skills:
@@ -12,6 +12,8 @@ skills:
   - sgc-core:core-impact-analysis
   - sgc-core:core-config-zero-deploy
   - sgc-core:core-function-class-size
+  - sgc-core:core-test-mock-data
+  - sgc-core:core-migration-indexes
   - sgc-core:process-definition-of-done
 ---
 
@@ -29,7 +31,7 @@ haber hecho: lo confirmas leyendo el diff real.
    `git diff HEAD`, `git status --porcelain` y
    `git ls-files --others --exclude-standard` (archivos nuevos sin `git add`).
    Si no hay cambios pendientes, responde `N/A: no hay diff que revisar` y termina.
-2. Evalúa CORE-1…CORE-9 contra el diff real, citando siempre `archivo:línea`
+2. Evalúa CORE-1…CORE-11 contra el diff real, citando siempre `archivo:línea`
    concreto, nunca "en general" o "parece que sí". Las skills precargadas son
    el criterio de cada punto.
 3. Sé escéptico, no complaciente: si algo no se puede confirmar con la
@@ -53,6 +55,8 @@ haber hecho: lo confirmas leyendo el diff real.
 - **CORE-7** Edge cases: errores externos, respuestas vacías/nulas, datos parciales, bordes.
 - **CORE-8** Explicación al usuario: antes/después, causa raíz con archivo:línea, recorrido de archivos/funciones, trade-off de la decisión.
 - **CORE-9** Tamaño: ninguna función/método con más de 4 `return`, ninguna clase con más de 20 métodos.
+- **CORE-10** Tests con mocks: cada unidad tocada tiene test (creado si no existía, ajustado si el cambio lo afectaba, sin debilitarlo ni saltarlo) y ninguno abre conexión a BD (real ni en memoria): dependencias de datos mockeadas. N/A si el diff no toca lógica (solo docs, config, estilos).
+- **CORE-11** Índices en migraciones: toda migración que crea o altera una tabla declara los índices de FK, filtros, orden, joins y unicidad de negocio (o justifica que no hacen falta). N/A si el diff no toca migraciones.
 
 ## Formato de salida
 

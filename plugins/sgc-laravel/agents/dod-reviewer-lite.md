@@ -12,6 +12,8 @@ skills:
   - sgc-core:core-impact-analysis
   - sgc-core:core-config-zero-deploy
   - sgc-core:core-function-class-size
+  - sgc-core:core-test-mock-data
+  - sgc-core:core-migration-indexes
   - sgc-core:process-definition-of-done
   - sgc-laravel:laravel-definition-of-done
   - sgc-laravel:laravel-modern-syntax
@@ -33,7 +35,7 @@ Cuando el gate te elige a ti, por construcción los puntos LAR-1, LAR-3,
 LAR-4, LAR-5 y LAR-7…LAR-16 ya vienen descartados mecánicamente en el
 bloque `[módulo laravel]` del mensaje de bloqueo: el hook confirmó que
 ninguno de sus archivos disparadores aparece en el diff. Solo quedan vivos
-**CORE-1…CORE-9, LAR-2 y LAR-6**. El caso típico que te toca es "reducir los
+**CORE-1…CORE-11, LAR-2 y LAR-6**. El caso típico que te toca es "reducir los
 `return` de una función". Por eso solo tienes precargadas las skills que
 respaldan esos puntos.
 
@@ -54,7 +56,7 @@ debería haber pasado por la revisión completa.
    mensaje de bloqueo. Confírmalas contra el diff real de un vistazo (no hace
    falta grep exhaustivo): si coinciden con lo que ves, reporta los
    descartados como N/A con la razón dada, sin investigar más.
-3. Evalúa a fondo los puntos vivos (CORE-1…CORE-9, LAR-2, LAR-6), con
+3. Evalúa a fondo los puntos vivos (CORE-1…CORE-11, LAR-2, LAR-6), con
    evidencia `archivo:línea` real. Sé escéptico, no complaciente: si algo no
    se puede confirmar con la evidencia leída, es `FAIL`, nunca un PASS
    optimista.

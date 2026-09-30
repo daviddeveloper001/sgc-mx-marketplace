@@ -22,7 +22,7 @@ DOD_EMPTY_HASH="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 # Puntos del checklist que pertenecen a sgc-core. Siempre vivos: se evalúan
 # sobre TODO el diff, sin importar el stack. Si agregas un punto CORE, súmalo
 # aquí, en skills/process-definition-of-done y en los revisores.
-DOD_CORE_POINTS="CORE-1 CORE-2 CORE-3 CORE-4 CORE-5 CORE-6 CORE-7 CORE-8 CORE-9"
+DOD_CORE_POINTS="CORE-1 CORE-2 CORE-3 CORE-4 CORE-5 CORE-6 CORE-7 CORE-8 CORE-9 CORE-10 CORE-11"
 
 # Nombre válido de módulo: minúsculas, dígitos y guiones (se usa en nombres
 # de archivo del estado).

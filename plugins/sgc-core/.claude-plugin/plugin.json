@@ -1,7 +1,7 @@
 {
   "name": "sgc-core",
   "description": "Estándares de SGC-MX agnósticos de stack: skills core-* auto-disparadas, checklist de cierre CORE-*, el subagente sgc-core:dod-reviewer y el hook que bloquea el cierre de una tarea hasta que el diff pase el Definition of Done. Los plugins de stack (sgc-laravel, sgc-nestjs) se enchufan a este gate como módulos.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Deivy Potosi"
   },

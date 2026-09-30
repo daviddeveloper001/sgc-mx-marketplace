@@ -34,6 +34,8 @@ El hook `dod-stop-gate.sh` de `sgc-core` arma la combinación en cada intento de
 7. **CORE-7 · Edge cases.** ¿Errores externos, respuestas vacías/nulas, datos parciales, bordes? (`core-edge-case-analysis`)
 8. **CORE-8 · Explicación al usuario.** ¿La respuesta indica qué pasaba antes vs. ahora, la causa raíz con archivo:línea, el recorrido de archivos/funciones y el trade-off de la decisión tomada?
 9. **CORE-9 · Tamaño de funciones y clases.** ¿Ninguna función/método tocado supera 4 `return`, y ninguna clase tocada supera 20 métodos? (`core-function-class-size`)
+10. **CORE-10 · Tests con mocks.** ¿Cada función/método/clase con lógica tocada tiene su test (se buscó si existía; si no, se creó; si existía y el cambio lo afecta, se ajustó sin debilitarlo ni saltarlo), se ejecutaron, y ninguno abre conexión a base de datos (real ni en memoria), usando dobles y datos mock? N/A si el diff no toca lógica (solo docs, config, estilos). (`core-test-mock-data`)
+11. **CORE-11 · Índices en migraciones.** ¿Toda migración que crea o altera una tabla declara los índices que necesita (FK, filtros, orden, joins, unicidad de negocio, `tenant_id`) o justifica por qué ninguno? N/A si el diff no toca migraciones. (`core-migration-indexes`)
 
 Si al repasar se detecta un incumplimiento, se corrige antes de responder. No se reporta como pendiente, salvo que el usuario haya limitado explícitamente el alcance de la tarea.
 

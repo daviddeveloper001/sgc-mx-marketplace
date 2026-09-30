@@ -1,6 +1,6 @@
 ---
 name: dod-reviewer
-description: Revisor de cierre (Definition of Done) para diffs que tocan código Laravel. Verifica CORE-1…CORE-9 (agnósticos) más LAR-1…LAR-16 (controladores, queries, i18n, errores, Blade, sintaxis moderna, multi-tenant, Form Requests, Resources, controlador base, Filters, Repositories, Services y excepciones de API, migraciones, modelos Eloquent). Invocar cuando el mensaje de bloqueo de dod-stop-gate (sgc-core) indique "sgc-laravel:dod-reviewer", o antes de declarar terminada una tarea de código Laravel si el gate no está disponible.
+description: Revisor de cierre (Definition of Done) para diffs que tocan código Laravel. Verifica CORE-1…CORE-11 (agnósticos) más LAR-1…LAR-16 (controladores, queries, i18n, errores, Blade, sintaxis moderna, multi-tenant, Form Requests, Resources, controlador base, Filters, Repositories, Services y excepciones de API, migraciones, modelos Eloquent). Invocar cuando el mensaje de bloqueo de dod-stop-gate (sgc-core) indique "sgc-laravel:dod-reviewer", o antes de declarar terminada una tarea de código Laravel si el gate no está disponible.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 skills:
@@ -12,6 +12,8 @@ skills:
   - sgc-core:core-impact-analysis
   - sgc-core:core-config-zero-deploy
   - sgc-core:core-function-class-size
+  - sgc-core:core-test-mock-data
+  - sgc-core:core-migration-indexes
   - sgc-core:process-definition-of-done
   - sgc-laravel:laravel-definition-of-done
   - sgc-laravel:laravel-thin-controllers
@@ -91,6 +93,8 @@ puntos LAR-* aplican con el mismo criterio.
 - **CORE-7** Edge cases: errores externos, respuestas vacías/nulas, datos parciales, bordes.
 - **CORE-8** Explicación al usuario: antes/después, causa raíz con archivo:línea, recorrido de archivos/funciones, trade-off.
 - **CORE-9** Tamaño: ninguna función/método con más de 4 `return`, ninguna clase con más de 20 métodos.
+- **CORE-10** Tests con mocks: cada unidad tocada tiene test (creado si no existía, ajustado si el cambio lo afectaba, sin debilitarlo ni saltarlo) y ninguno abre conexión a BD (real ni en memoria): dependencias de datos mockeadas. N/A si el diff no toca lógica (solo docs, config, estilos).
+- **CORE-11** Índices en migraciones: toda migración que crea o altera una tabla declara los índices de FK, filtros, orden, joins y unicidad de negocio (o justifica que no hacen falta). N/A si el diff no toca migraciones.
 - **LAR-1** Controladores Laravel delgados (≤15 líneas, sin lógica de negocio ni queries, Form Request, delegación a `App\Services`).
 - **LAR-2** Queries complejas encapsuladas en el modelo (scope o método).
 - **LAR-3** Textos vía `__()`/`@lang()` con su entrada en `lang/*/...php`.
