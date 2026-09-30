@@ -1,0 +1,10 @@
+{
+  "name": "sgc-nestjs",
+  "description": "Convenciones de SGC-MX para NestJS / TypeScript (skills nestjs-*), checklist de cierre NEST-* y el revisor sgc-nestjs:dod-reviewer. Se registra como módulo del gate de sgc-core solo en repos que usan @nestjs/core.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Deivy Potosi"
+  },
+  "keywords": ["nestjs", "typescript", "definition-of-done"],
+  "dependencies": ["sgc-core"]
+}

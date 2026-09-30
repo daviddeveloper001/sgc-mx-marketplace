@@ -1,0 +1,6 @@
+# Los hooks se ejecutan con bash (Git Bash en Windows). Con core.autocrlf=true,
+# git los sacaría con CRLF y bash falla con "$'\r': command not found".
+# Forzar LF en scripts, sin importar la configuración de cada máquina.
+*.sh   text eol=lf
+*.js   text eol=lf
+*.json text eol=lf

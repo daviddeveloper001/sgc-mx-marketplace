@@ -1,9 +1,10 @@
 {
   "name": "sgc-mx-toolkit",
-  "description": "Estándares de arquitectura de SGC-MX como skills auto-disparadas (core + Laravel + multi-tenant), más los subagentes dod-reviewer/dod-reviewer-lite y el hook que bloquea el cierre de una tarea hasta que el diff pase el Definition of Done.",
-  "version": "0.7.0",
+  "description": "Bundle de transición: ya no trae skills propias, solo instala sgc-core + sgc-laravel + sgc-nestjs para que los repos que tenían sgc-mx-toolkit migren con /plugin marketplace update. Para repos nuevos, instala sgc-core y el plugin de tu stack.",
+  "version": "1.0.0",
   "author": {
     "name": "Deivy Potosi"
   },
-  "keywords": ["laravel", "nestjs", "ddd", "solid", "definition-of-done", "code-review"]
+  "keywords": ["bundle", "deprecated"],
+  "dependencies": ["sgc-core", "sgc-laravel", "sgc-nestjs"]
 }

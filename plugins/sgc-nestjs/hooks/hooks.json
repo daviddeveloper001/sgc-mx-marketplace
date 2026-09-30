@@ -1,0 +1,16 @@
+{
+  "description": "Registra el módulo NestJS (puntos NEST-*, pre-filtrado por tipo de archivo de Nest y revisor sgc-nestjs:dod-reviewer) en el gate de cierre de sgc-core, solo si el proyecto usa @nestjs/core.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/register-dod-module.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

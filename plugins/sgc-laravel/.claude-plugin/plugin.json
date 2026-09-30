@@ -1,0 +1,10 @@
+{
+  "name": "sgc-laravel",
+  "description": "Convenciones de SGC-MX para Laravel 12 / PHP 8.4 (skills laravel-* y multi-tenant-architecture), checklist de cierre LAR-* y los revisores sgc-laravel:dod-reviewer / dod-reviewer-lite. Se registra como módulo del gate de sgc-core solo en repos que usan laravel/framework.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Deivy Potosi"
+  },
+  "keywords": ["laravel", "php", "multi-tenant", "definition-of-done"],
+  "dependencies": ["sgc-core"]
+}

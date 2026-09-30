@@ -1,0 +1,16 @@
+{
+  "description": "Registra el módulo Laravel (puntos LAR-*, pre-filtrado por rutas de Laravel y revisores sgc-laravel:dod-reviewer / dod-reviewer-lite) en el gate de cierre de sgc-core, solo si el proyecto usa laravel/framework.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/register-dod-module.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

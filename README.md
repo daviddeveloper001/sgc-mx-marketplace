@@ -1,151 +1,254 @@
 # sgc-mx — marketplace personal de Claude Code
 
-Este repo es una **marketplace de Claude Code** con un solo plugin,
-`sgc-mx-toolkit`: los 31 skills de estándares SGC-MX (core + Laravel + NestJS) (core + Laravel +
-multi-tenant), los subagentes `dod-reviewer`/`dod-reviewer-lite`, y el hook que bloquea el cierre
-de una tarea hasta que el diff pasa el Definition of Done.
+Marketplace de Claude Code con los estándares de desarrollo de SGC-MX, divididos
+en plugins por stack:
 
-Es la evolución de dos entregas anteriores (`sgc-mx-skills.zip`, entregado
-como carpetas sueltas para copiar a mano): ahora es instalable con un
-comando, igual en cualquier máquina, y actualizable con otro comando — sin
-copiar carpetas ni tocar `claude_desktop_config.json` como proponía el
-servidor MCP original.
+| Plugin | Qué trae | Dónde instalarlo |
+|---|---|---|
+| `sgc-core` | 8 skills `core-*` agnósticas + `process-definition-of-done` (checklist CORE-*), el revisor `sgc-core:dod-reviewer` y **el único hook de cierre** (`dod-stop-gate`) | Todo repo (los plugins de stack lo instalan solos) |
+| `sgc-laravel` | 16 skills `laravel-*` + `multi-tenant-architecture` + `laravel-definition-of-done` (LAR-*), revisores `sgc-laravel:dod-reviewer` y `dod-reviewer-lite`, módulo de cierre Laravel | Repos Laravel |
+| `sgc-nestjs` | 6 skills `nestjs-*` + `nestjs-definition-of-done` (NEST-*), revisor `sgc-nestjs:dod-reviewer`, módulo de cierre NestJS | Repos NestJS |
+| `sgc-mx-toolkit` | Nada propio: bundle de transición que instala los tres de arriba | Solo para migrar repos que ya lo tenían |
 
 ```
 sgc-mx-marketplace/
-├── .claude-plugin/
-│   └── marketplace.json          # catálogo: qué plugins ofrece este repo
+├── .claude-plugin/marketplace.json
+├── .gitattributes                      # fuerza LF en .sh/.js/.json (Git Bash)
 └── plugins/
+    ├── sgc-core/
+    │   ├── .claude-plugin/plugin.json
+    │   ├── skills/                     # core-* + process-definition-of-done
+    │   ├── agents/dod-reviewer.md      # sgc-core:dod-reviewer (solo CORE-*)
+    │   ├── hooks/
+    │   │   ├── hooks.json              # SessionStart (limpieza) + Stop (gate)
+    │   │   ├── dod-stop-gate.sh        # el gate: hash, intentos, módulos, mensaje
+    │   │   ├── dod-mark-approved.sh    # registra la aprobación de un módulo
+    │   │   ├── dod-lib.sh              # funciones compartidas por los dos anteriores
+    │   │   └── dod-session-cleanup.sh
+    │   └── CLAUDE.md.global.example
+    ├── sgc-laravel/
+    │   ├── .claude-plugin/plugin.json  # dependencies: ["sgc-core"]
+    │   ├── skills/                     # laravel-* + multi-tenant + laravel-definition-of-done
+    │   ├── agents/                     # dod-reviewer.md, dod-reviewer-lite.md
+    │   ├── dod/
+    │   │   ├── module.json             # nombre del módulo + cómo detectar Laravel
+    │   │   └── prefilter.sh            # puntos LAR-* vivos / descartados
+    │   ├── hooks/
+    │   │   ├── hooks.json              # SessionStart → registra el módulo
+    │   │   └── register-dod-module.js  # idéntico en todos los plugins de stack
+    │   └── CLAUDE.md.laravel-project.example
+    ├── sgc-nestjs/                     # misma forma que sgc-laravel
     └── sgc-mx-toolkit/
-        ├── .claude-plugin/
-        │   └── plugin.json       # metadata del plugin
-        ├── skills/                # los 31 skills (ver detalle abajo)
-        ├── agents/
-        │   ├── dod-reviewer.md
-        │   └── dod-reviewer-lite.md
-        ├── hooks/
-        │   ├── hooks.json         # declara el hook Stop
-        │   ├── dod-stop-gate.sh
-        │   └── dod-mark-approved.sh
-        ├── CLAUDE.md.global.example
-        └── CLAUDE.md.laravel-project.example
+        └── .claude-plugin/plugin.json  # bundle: dependencies core+laravel+nestjs
 ```
 
 ## Instalación
 
-**Opción A — probarlo ya, desde esta carpeta descomprimida (sin git):**
-
 ```
-/plugin marketplace add /ruta/donde/descomprimiste/sgc-mx-marketplace
-/plugin install sgc-mx-toolkit@sgc-mx
+/plugin marketplace add daviddeveloper001/sgc-mx-marketplace
 ```
 
-**Opción B — para tenerlo sincronizado en todas tus máquinas:** subí esta
-carpeta tal cual a un repo git tuyo (GitHub o GitLab, privado), y en cada
-máquina:
+Luego, en cada repo, solo lo que usa:
 
 ```
-/plugin marketplace add <tu-usuario>/sgc-mx-marketplace
-/plugin install sgc-mx-toolkit@sgc-mx
+/plugin install sgc-laravel@sgc-mx     # repo Laravel  (trae sgc-core)
+/plugin install sgc-nestjs@sgc-mx      # repo NestJS   (trae sgc-core)
+/plugin install sgc-core@sgc-mx        # cualquier otro stack: solo reglas agnósticas
 ```
 
-Cuando cambies algo en el vault (agregar un skill, ajustar una regla),
-hacés commit + push una vez, y en cada máquina corrés:
+En un monorepo con Laravel y Nest, instala los dos. Si los habilitas a nivel de
+usuario (en todos los repos), no pasa nada: cada módulo de stack solo se activa
+en los repos donde detecta su framework (ver "Cómo funciona el cierre").
+
+Para actualizar, después de hacer push:
 
 ```
 /plugin marketplace update
 ```
 
-Con eso se actualizan skills, agentes y hooks a la vez — ya no hay que copiar
-carpetas a mano ni recompilar nada (a diferencia del servidor MCP en
-TypeScript de la propuesta original).
+`dependencies` en `plugin.json` requiere una versión de Claude Code con soporte
+de dependencias entre plugins. En una versión anterior, el campo se ignora:
+instala `sgc-core` a mano junto al plugin de tu stack.
 
-## Qué trae el plugin
+### Migración desde `sgc-mx-toolkit` (≤ 0.7.0)
 
-- **31 skills** organizados en `core-*` (agnósticos de stack), `laravel-*`, y ahora `nestjs-*`
-  (convenciones de Laravel/PHP), `multi-tenant-architecture` (específico de
-  que este SaaS es multi-tenant) y `process-definition-of-done` (el
-  checklist de cierre). Se disparan solos según la `description` de cada
-  uno — no hace falta mencionarlos.
-- **`dod-reviewer`**: subagente de solo lectura que verifica el diff real
-  contra los 24 puntos del checklist, citando `archivo:línea`, antes de dar
-  una tarea por terminada.
-- **`dod-reviewer-lite`**: misma verificación, mismo formato auditable de 24
-  puntos, pero pensada para diffs chicos que no tocan ninguna ruta sensible
-  (sin controlador, migración, modelo, ecosistema de API, Form Request,
-  Job/Command, ni un `catch` nuevo) — menos skills precargados y modelo más
-  rápido. El hook decide cuál de los dos invocar, nunca lo decide el modelo
-  principal por su cuenta.
-- **Hook `Stop`**: bloquea el cierre de la tarea hasta que `dod-reviewer` (o
-  `dod-reviewer-lite`) registre una aprobación para el diff vigente (máximo
-  2 intentos de bloqueo por diff — al tercero deja pasar con una
-  advertencia, para nunca generar un loop infinito). Desde v0.7.0, el hook
-  también hace un **pre-filtrado mecánico**: mira qué archivos cambiaron y
-  descarta en el propio mensaje de bloqueo los puntos del checklist que no
-  pueden aplicar (ej. sin `.blade.php` en el diff, el punto 5 ya viene N/A),
-  para que el subagente no tenga que investigar por su cuenta lo obviamente
-  inaplicable. Los puntos agnósticos de stack (2, 6, 7, 8, 9, 10, 11, 12, 13,
-  24) nunca se descartan así — siempre se evalúan a fondo.
-- **Dos `CLAUDE.md` de ejemplo**: uno global corto (regla de explicación y
-  trazabilidad, que debe aplicar siempre) y uno de proyecto Laravel
-  (referencia a que el plugin ya trae las convenciones).
+`sgc-mx-toolkit` 1.0.0 es un bundle vacío que depende de los tres plugins
+nuevos: un `/plugin marketplace update` en un repo que ya lo tenía instala
+`sgc-core`, `sgc-laravel` y `sgc-nestjs`, y el comportamiento queda igual que
+antes (más el módulo Nest). Cuando quieras dejarlo limpio:
+
+```
+/plugin uninstall sgc-mx-toolkit@sgc-mx
+/plugin install sgc-laravel@sgc-mx        # o el plugin de ese repo
+claude plugin prune                        # quita dependencias que ya nadie usa
+```
+
+Los subagentes cambian de nombre: `sgc-mx-toolkit:dod-reviewer` pasa a ser
+`sgc-laravel:dod-reviewer` (y existen `sgc-core:dod-reviewer` y
+`sgc-nestjs:dod-reviewer`). Si algún `CLAUDE.md` de proyecto nombra al
+anterior, actualízalo.
+
+## Cómo decide Claude qué skill usar
+
+Claude no elige "un plugin" para una tarea. Lee la `description` de **todas**
+las skills habilitadas, vengan del plugin que vengan, y activa las que
+coinciden con lo que se está haciendo. Al refactorizar un controlador Nest que
+compara un estado con `'activo'`, se disparan a la vez `nestjs-dtos` (de
+`sgc-nestjs`), `core-clean-architecture` y `core-zero-magic-values` (de
+`sgc-core`). Dividir en plugins no cambia ese mecanismo: cambia qué skills
+existen en cada repo.
+
+## Cómo funciona el cierre (Definition of Done)
+
+El checklist tiene dos capas, con IDs por módulo:
+
+- **CORE-1…CORE-9** (`sgc-core`): agnósticos, siempre vivos, en cualquier stack.
+- **LAR-1…LAR-16** (`sgc-laravel`) y **NEST-1…NEST-6** (`sgc-nestjs`): se suman
+  cuando el diff toca el stack de ese módulo.
+
+El flujo:
+
+1. **SessionStart.** Cada plugin de stack corre `register-dod-module.js`. Busca
+   su manifiesto (`composer.json` con `laravel/framework`, `package.json` con
+   `@nestjs/core`): hacia arriba hasta la raíz del repo y hacia abajo hasta 3
+   niveles, ignorando `node_modules`, `vendor`, etc. Si lo encuentra, escribe
+   `~/.claude/dod-state/sessions/<session_id>/modules/<modulo>.mod` con la ruta
+   a su pre-filtro y las carpetas del repo donde vive ese stack (`root=.`,
+   `root=backend`, `root=apps/api`…). Si no lo encuentra, no registra nada.
+2. **Stop.** `dod-stop-gate.sh` (único hook Stop, en `sgc-core`) calcula el
+   hash del diff. Si no hay cambios, o ya está aprobado, deja cerrar.
+3. Para cada módulo registrado en la sesión, filtra los archivos del diff a sus
+   carpetas y corre su `dod/prefilter.sh`. El pre-filtro dice si aplica, qué
+   revisor usar y qué puntos quedan vivos o descartados (con su razón).
+4. El gate bloquea con un mensaje que lista, por módulo activo, el subagente
+   exacto (`sgc-laravel:dod-reviewer`, `…-lite`, `sgc-nestjs:dod-reviewer`),
+   sus puntos y la línea de aprobación. Si ningún módulo aplica (repo sin
+   plugin de stack, o un diff que solo toca JS, SQL o docs), lo revisa
+   `sgc-core:dod-reviewer` con los CORE-*.
+5. Cada revisor que aprueba ejecuta
+   `bash ".../dod-mark-approved.sh" <modulo> "<raiz-del-proyecto>"`. El cierre
+   se libera cuando **todos** los módulos activos aprobaron el mismo diff: en
+   un monorepo, un diff que toca Laravel y Nest pide las dos aprobaciones.
+6. Válvula de seguridad: máximo 2 bloqueos por diff. Al tercero deja pasar con
+   una advertencia, para nunca generar un loop infinito.
+
+### Equivalencia con el checklist anterior de 24 puntos
+
+| Antes | Ahora | Antes | Ahora | Antes | Ahora |
+|---|---|---|---|---|---|
+| 1 | CORE-1 + LAR-1 | 9 | CORE-4 | 17 | LAR-10 |
+| 2 | LAR-2 | 10 | CORE-5 | 18 | LAR-11 |
+| 3 | LAR-3 | 11 | CORE-6 | 19 | LAR-12 |
+| 4 | LAR-4 | 12 | CORE-7 | 20 | LAR-13 |
+| 5 | LAR-5 | 13 | CORE-8 | 21 | LAR-14 |
+| 6 | CORE-2 | 14 | LAR-7 | 22 | LAR-15 |
+| 7 | LAR-6 | 15 | LAR-8 | 23 | LAR-16 |
+| 8 | CORE-3 | 16 | LAR-9 | 24 | CORE-9 |
+
+El antiguo punto 1 se dividió en dos: el principio agnóstico (CORE-1, que
+ahora también aplica a Nest) y la convención concreta de Laravel (LAR-1: ≤15
+líneas, Form Request, `App\Services`). Los antiguos puntos 2 y 7 figuraban
+como "agnósticos", pero sus reglas son de Eloquent y de PHP 8.4, así que
+pasaron a Laravel (LAR-2, LAR-6). Siguen siempre vivos cuando el diff toca PHP.
+
+## Contrato de un módulo de stack (ej. agregar Python)
+
+Un stack nuevo es un plugin nuevo; `sgc-core` no se toca.
+
+1. `plugins/sgc-<stack>/.claude-plugin/plugin.json` con
+   `"dependencies": ["sgc-core"]`, más su entrada en `marketplace.json`.
+2. `skills/<stack>-*/SKILL.md` con las convenciones, y
+   `skills/<stack>-definition-of-done/SKILL.md` con sus puntos `<PREFIJO>-N`.
+3. `agents/dod-reviewer.md`: copia el de `sgc-nestjs` y cambia la lista de
+   puntos, las skills precargadas (siempre con nombre completo
+   `plugin:skill`) y el módulo de la línea de aprobación.
+4. `hooks/register-dod-module.js`: **cópialo tal cual** de `sgc-laravel`.
+5. `hooks/hooks.json`: el mismo `SessionStart` que `sgc-laravel`.
+6. `dod/module.json`:
+   ```json
+   { "name": "python", "prefilter": "dod/prefilter.sh",
+     "detect": { "manifests": ["pyproject.toml", "requirements.txt"], "contains": "django" } }
+   ```
+7. `dod/prefilter.sh`. El gate le pasa por entorno:
+   - `DOD_FILES`: archivo con las rutas del diff dentro de las carpetas del
+     módulo, una por línea, relativas a la raíz del repo, incluidos los
+     archivos no trackeados.
+   - `DOD_DIFF`: archivo con el diff de esas carpetas, más el contenido de
+     los archivos no trackeados como líneas `+`.
+   - `DOD_NUM_FILES`, `DOD_NUM_LINES`: tamaño del diff del módulo.
+     `DOD_TOTAL_FILES`, `DOD_TOTAL_LINES`: tamaño del diff completo.
+     `DOD_PROJECT_DIR`: raíz del repo.
+
+   Y debe imprimir por stdout:
+   ```
+   ACTIVE=true|false               # false = el diff no toca este stack
+   REVIEWER=sgc-python:dod-reviewer
+   REVIEWER_NOTE=<una línea, opcional>
+   LIVE=PY-1 PY-3                  # puntos del módulo a evaluar a fondo
+   NA=PY-2|<razón>                 # una línea por punto descartado
+   ```
+   Si el pre-filtro falla (exit ≠ 0), el gate no se cae: exige la revisión
+   completa del módulo y lo avisa en el mensaje.
 
 ## Requisitos
 
-`git`, `bash` y `node` en el PATH que usa Claude Code (en Windows: Git Bash,
-que ya tenés instalado). Los hooks no usan `jq` a propósito.
+`git`, `bash` y `node` en el PATH que usa Claude Code (en Windows: Git Bash).
+Los hooks no usan `jq` ni `find`, y están escritos para bash 3.2 (macOS).
 
 ## Probado antes de entregarlo
 
-El hook se probó de punta a punta en un repo git descartable simulando: sin
-cambios, cambio nuevo bloqueado dos veces, válvula de seguridad al tercer
-intento, aprobación, y un cambio nuevo reiniciando el contador — tanto en la
-ubicación de plugin (`hooks/` dentro del plugin instalado) como en la
-instalación manual anterior (`.claude/hooks/` de un proyecto). En el camino
-se encontraron y corrigieron dos bugs reales antes de esta entrega:
+En repos git desechables (Linux, bash 5), con los hooks tal como los llama
+Claude Code (JSON por stdin, exit 2 + stderr para bloquear):
 
-1. El directorio de estado del hook vivía dentro del repo del proyecto, así
-   que `git status` lo veía como archivo nuevo y el hash del diff cambiaba
-   solo en cada corrida (nunca dejaba de bloquear). Se movió fuera del repo,
-   a `~/.claude/dod-state/<hash-del-proyecto>/`.
-2. La ruta al script de aprobación (`dod-mark-approved.sh`) estaba fija a
-   `.claude/hooks/...`, lo cual se rompe en cuanto el toolkit se instala
-   como plugin (vive en otra carpeta). Ahora el propio hook resuelve la
-   ruta relativa a sí mismo y se la da a `dod-reviewer` en el mensaje de
-   bloqueo, para que nunca tenga que adivinarla.
+- **Laravel.** Sin cambios deja cerrar. Un `catch` en un archivo nuevo sin
+  `git add` activa LAR-4 y pide revisión completa. Un diff chico sin rutas
+  sensibles pide `dod-reviewer-lite` con LAR-2 y LAR-6 vivos. Un diff que solo
+  toca JS lo revisa el core.
+- **Aprobación.** Registrada desde una subcarpeta con la ruta explícita, se
+  respeta. Un cambio posterior vuelve a bloquear. La válvula deja pasar al
+  tercer intento. `dod-mark-approved.sh` sin módulo, o con un nombre
+  inválido, falla con un mensaje de uso.
+- **NestJS.** En un repo Nest, `sgc-laravel` no se registra aunque esté
+  habilitado. Un service con `interface` inline, imports y `any` deja vivos
+  NEST-1, 3, 4, 5 y 6. Un `util.ts` sin imports deja vivo solo NEST-1.
+- **Monorepo** (`backend/` Laravel, `apps/api` Nest, `frontend/` Vue con
+  TypeScript, un `package.json` de Nest dentro de `node_modules`). Registra
+  `root=backend` y `root=apps/api`, e ignora `node_modules`. Un cambio solo en
+  `frontend/*.ts` no activa Nest. Un diff que toca los dos stacks exige dos
+  aprobaciones: con una sola, sigue bloqueado y marca la otra como "YA
+  APROBADO". Una sesión abierta en `apps/api/src` también registra
+  `root=apps/api`.
+- **Robustez.** Si el pre-filtro de un módulo desaparece a mitad de sesión, el
+  gate avisa y cae al revisor core. Si falla, exige la revisión completa del
+  módulo.
 
-## Limitaciones honestas
+## Limitaciones conocidas
 
-- El hash del diff se arma con `git diff HEAD` + `git status --porcelain`.
-  Un archivo nuevo aún no trackeado (`git add`) no entra al hash por su
-  contenido hasta que lo agregues al índice — recomendación: `git add -A`
-  antes de pedir el cierre de la tarea. El pre-filtrado mecánico (qué
-  archivos cambiaron) tiene la misma dependencia.
-- Requiere que el proyecto sea un repo git; si no lo es, el hook se
-  desactiva solo (no bloquea nada).
-- La skill `multi-tenant-architecture` asume el patrón de tenancy descrito
-  en la regla 14 original; si tu paquete de tenancy usa otra API, ajustá
-  esa skill puntual.
-- El pre-filtrado mecánico usa rutas de convención estándar de Laravel
-  (`Http/Controllers/`, `app/Models/`, `database/migrations/`, etc.). Si tu
-  proyecto usa una estructura de carpetas muy distinta, algunos puntos
-  podrían quedar mal clasificados como N/A — revisá los patrones `grep -E`
-  al inicio de `dod-stop-gate.sh` (sección "pre-filtrado mecánico") y
-  ajustalos a tu convención real antes de confiar el 100% en el atajo.
+- El hash del diff sigue siendo `git diff HEAD` + `git status --porcelain`: el
+  **contenido** de un archivo nuevo sin `git add` no entra al hash (su nombre
+  sí). El pre-filtrado ahora sí ve esos archivos y su contenido.
+- Un módulo se registra al inicio de la sesión. Si instalas o habilitas un
+  plugin de stack a mitad de sesión (`/reload-plugins`), su módulo no existe
+  hasta la próxima sesión, y mientras tanto el cierre lo revisa el core.
+- Los pre-filtros usan convenciones de nombres: rutas estándar de Laravel
+  (`Http/Controllers/`, `database/migrations/`…) y sufijos del CLI de Nest
+  (`*.service.ts`, `*.dto.ts`…). Con otra estructura, algunos puntos podrían
+  quedar mal clasificados como N/A: ajusta los patrones de la sección
+  "Categorías" de cada `dod/prefilter.sh`.
 - Los umbrales de "diff pequeño" para `dod-reviewer-lite` (`LINE_THRESHOLD`,
-  `FILE_THRESHOLD` en `dod-stop-gate.sh`) son un punto de partida arbitrario,
-  no un dato medido — ajustalos si en la práctica ves diffs mal clasificados.
+  `FILE_THRESHOLD` en `sgc-laravel/dod/prefilter.sh`) son un punto de partida
+  arbitrario, no un dato medido.
+- Las skills precargadas en los revisores usan nombre completo
+  (`sgc-core:core-zero-magic-values`). Si Claude Code no encuentra una, la
+  omite y solo lo registra en el log de depuración. Por eso cada revisor
+  repite en su cuerpo la lista de puntos que evalúa.
+- `multi-tenant-architecture` vive en `sgc-laravel` porque su contenido usa la
+  API de tenancy de Laravel. Si un proyecto Nest también es multi-tenant,
+  conviene moverla a `sgc-core` con ejemplos neutrales.
 
-## Pendiente (no incluido en esta entrega)
+## Pendiente
 
-- `skills/nestjs-*` — convenciones de NestJS (falta que las definas, igual
-  que hiciste con Laravel).
-- Integrar el pre-filtrado mecánico y `dod-reviewer-lite` al flujo genérico
-  de `process-definition-of-done` (hoy solo el hook de Laravel lo hace;
-  NestJS y otros stacks sin subagente propio siguen sin ese atajo).
-- Un hook `PostToolUse` liviano (heurísticas grep o Larastan/PHP-CS-Fixer)
-  para atrapar lo mecánico sin gastar una pasada completa de `dod-reviewer`
-  en cada guardado.
-- Publicar el repo en tu cuenta de git para que `/plugin marketplace add`
-  funcione igual desde cualquier máquina sin depender de una carpeta local.
-# SGC-MX-Standards-workflow-and-automation
+- NestJS: variante `dod-reviewer-lite` y equivalentes de Filter, Service y
+  excepciones de dominio (hoy solo hay repositorios).
+- Un hook `PostToolUse` liviano (heurísticas grep, Larastan, ESLint) para
+  atrapar lo mecánico sin gastar una pasada de revisor en cada guardado.

@@ -1,0 +1,8 @@
+{
+  "name": "nestjs",
+  "prefilter": "dod/prefilter.sh",
+  "detect": {
+    "manifests": ["package.json"],
+    "contains": "\"@nestjs/core\""
+  }
+}

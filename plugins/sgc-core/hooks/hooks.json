@@ -1,0 +1,27 @@
+{
+  "description": "Gate de cierre de sgc-core: bloquea el cierre de una tarea de código hasta que el revisor de Definition of Done que corresponde (core o el del módulo de stack registrado) apruebe el diff.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dod-session-cleanup.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dod-stop-gate.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

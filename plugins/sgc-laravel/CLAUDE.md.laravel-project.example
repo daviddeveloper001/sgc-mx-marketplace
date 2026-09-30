@@ -1,0 +1,15 @@
+# CLAUDE.md de proyecto (raíz de un repo Laravel)
+# Objetivo: quedar CORTO. La sustancia vive en los skills, que se cargan solo
+# cuando el contexto de la tarea los dispara — no todo el tiempo.
+
+Este es un proyecto Laravel 12 / PHP 8.4, parte del ecosistema SGC-MX.
+
+- Stack: Laravel 12, PHP 8.4, MySQL, multi-tenant (paquete de tenancy: <nombre>).
+- Comandos: `composer test`, `php artisan test --filter=...`, `npm run build`.
+- Plugins: `sgc-laravel` (instala `sgc-core` como dependencia). Las convenciones de
+  código están en las skills `laravel-*` y `core-*`, que se disparan solas según el
+  archivo que se esté tocando (controlador, modelo, vista Blade, etc.).
+- Cierre de tareas: el gate de `sgc-core` exige la aprobación de
+  `sgc-laravel:dod-reviewer` (o `dod-reviewer-lite` en diffs chicos) contra CORE-* + LAR-*.
+- Este proyecto SÍ es multi-tenant: el skill `multi-tenant-architecture` aplica a
+  cualquier job/comando/servicio que itere sobre planes o tenants (punto LAR-7).
