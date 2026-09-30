@@ -12,17 +12,12 @@
     {
       "name": "sgc-laravel",
       "source": "./plugins/sgc-laravel",
-      "description": "Convenciones de Laravel 12 / PHP 8.4 + multi-tenant, checklist LAR-* y sus revisores. Instala sgc-core automáticamente."
+      "description": "Convenciones de Laravel 12 / PHP 8.4 + multi-tenant, checklist LAR-* y sus revisores. Requiere sgc-core: instálalo también (la app de Claude no instala dependencias sola)."
     },
     {
       "name": "sgc-nestjs",
       "source": "./plugins/sgc-nestjs",
-      "description": "Convenciones de NestJS / TypeScript, checklist NEST-* y su revisor. Instala sgc-core automáticamente."
-    },
-    {
-      "name": "sgc-mx-toolkit",
-      "source": "./plugins/sgc-mx-toolkit",
-      "description": "Bundle de transición (antes: el plugin único). Instala sgc-core + sgc-laravel + sgc-nestjs. Para repos nuevos, instala solo lo que uses."
+      "description": "Convenciones de NestJS / TypeScript, checklist NEST-* y su revisor. Requiere sgc-core: instálalo también (la app de Claude no instala dependencias sola)."
     }
   ]
 }

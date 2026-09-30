@@ -8,7 +8,12 @@ en plugins por stack:
 | `sgc-core` | 8 skills `core-*` agnósticas + `process-definition-of-done` (checklist CORE-*), el revisor `sgc-core:dod-reviewer` y **el único hook de cierre** (`dod-stop-gate`) | Todo repo (los plugins de stack lo instalan solos) |
 | `sgc-laravel` | 16 skills `laravel-*` + `multi-tenant-architecture` + `laravel-definition-of-done` (LAR-*), revisores `sgc-laravel:dod-reviewer` y `dod-reviewer-lite`, módulo de cierre Laravel | Repos Laravel |
 | `sgc-nestjs` | 6 skills `nestjs-*` + `nestjs-definition-of-done` (NEST-*), revisor `sgc-nestjs:dod-reviewer`, módulo de cierre NestJS | Repos NestJS |
-| `sgc-mx-toolkit` | Nada propio: bundle de transición que instala los tres de arriba | Solo para migrar repos que ya lo tenían |
+
+> **Siempre `sgc-core` + el plugin de tu stack.** En la app de Claude
+> (Personalizar → Plugins) instala los dos a mano: la app **no** resuelve el
+> campo `dependencies`, así que instalar `sgc-laravel` no trae `sgc-core`. Sin
+> `sgc-core` no hay hook de cierre ni skills `core-*`, y los revisores del
+> stack quedan sin su criterio CORE.
 
 ```
 sgc-mx-marketplace/
@@ -37,51 +42,47 @@ sgc-mx-marketplace/
     │   │   ├── hooks.json              # SessionStart → registra el módulo
     │   │   └── register-dod-module.js  # idéntico en todos los plugins de stack
     │   └── CLAUDE.md.laravel-project.example
-    ├── sgc-nestjs/                     # misma forma que sgc-laravel
-    └── sgc-mx-toolkit/
-        └── .claude-plugin/plugin.json  # bundle: dependencies core+laravel+nestjs
+    └── sgc-nestjs/                     # misma forma que sgc-laravel
 ```
 
 ## Instalación
 
+**En la app de Claude** (plugins sincronizados desde este repositorio):
+en Personalizar → Plugins, dentro del marketplace `sgc-mx-marketplace`,
+instala `sgc-core` y además el plugin de cada stack que uses (`sgc-laravel`,
+`sgc-nestjs`). Tienen que ser los dos, porque la app no instala dependencias
+por su cuenta. Cada push a `main` se sincroniza solo, y **Actualizar** trae la
+versión nueva.
+
+**En Claude Code por línea de comandos:**
+
 ```
 /plugin marketplace add daviddeveloper001/sgc-mx-marketplace
-```
-
-Luego, en cada repo, solo lo que usa:
-
-```
-/plugin install sgc-laravel@sgc-mx     # repo Laravel  (trae sgc-core)
-/plugin install sgc-nestjs@sgc-mx      # repo NestJS   (trae sgc-core)
+/plugin install sgc-laravel@sgc-mx     # repo Laravel  (trae sgc-core vía dependencies)
+/plugin install sgc-nestjs@sgc-mx      # repo NestJS   (trae sgc-core vía dependencies)
 /plugin install sgc-core@sgc-mx        # cualquier otro stack: solo reglas agnósticas
 ```
 
-En un monorepo con Laravel y Nest, instala los dos. Si los habilitas a nivel de
-usuario (en todos los repos), no pasa nada: cada módulo de stack solo se activa
-en los repos donde detecta su framework (ver "Cómo funciona el cierre").
+Aquí `dependencies` sí instala `sgc-core` automáticamente, si tu versión de
+Claude Code lo soporta. Si no, instálalo a mano igual que en la app. Para
+actualizar después de un push: `/plugin marketplace update`.
 
-Para actualizar, después de hacer push:
+En un monorepo con Laravel y Nest, instala los dos plugins de stack. Si los
+habilitas para todos tus repos, no pasa nada: cada módulo de stack solo se
+activa en los repos donde detecta su framework (ver "Cómo funciona el
+cierre").
 
-```
-/plugin marketplace update
-```
+### Migración desde `sgc-mx-toolkit`
 
-`dependencies` en `plugin.json` requiere una versión de Claude Code con soporte
-de dependencias entre plugins. En una versión anterior, el campo se ignora:
-instala `sgc-core` a mano junto al plugin de tu stack.
+`sgc-mx-toolkit` ya no existe en el marketplace. La versión 1.0.0 fue un
+bundle vacío que dependía de los tres plugins nuevos, pensado para que
+`/plugin marketplace update` migrara solo. En la app de Claude eso no
+funciona, porque la app no resuelve `dependencies`: el bundle aparecía
+instalado pero sin contenido. Para migrar:
 
-### Migración desde `sgc-mx-toolkit` (≤ 0.7.0)
-
-`sgc-mx-toolkit` 1.0.0 es un bundle vacío que depende de los tres plugins
-nuevos: un `/plugin marketplace update` en un repo que ya lo tenía instala
-`sgc-core`, `sgc-laravel` y `sgc-nestjs`, y el comportamiento queda igual que
-antes (más el módulo Nest). Cuando quieras dejarlo limpio:
-
-```
-/plugin uninstall sgc-mx-toolkit@sgc-mx
-/plugin install sgc-laravel@sgc-mx        # o el plugin de ese repo
-claude plugin prune                        # quita dependencias que ya nadie usa
-```
+1. Instala `sgc-core` y el plugin de tu stack (ver "Instalación").
+2. Desinstala `sgc-mx-toolkit`.
+3. Abre una sesión nueva para que se registren los hooks y los revisores.
 
 Los subagentes cambian de nombre: `sgc-mx-toolkit:dod-reviewer` pasa a ser
 `sgc-laravel:dod-reviewer` (y existen `sgc-core:dod-reviewer` y
