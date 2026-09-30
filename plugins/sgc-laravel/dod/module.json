@@ -1,0 +1,8 @@
+{
+  "name": "laravel",
+  "prefilter": "dod/prefilter.sh",
+  "detect": {
+    "manifests": ["composer.json"],
+    "contains": "\"laravel/framework\""
+  }
+}

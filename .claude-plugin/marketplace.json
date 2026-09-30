@@ -5,9 +5,24 @@
   },
   "plugins": [
     {
+      "name": "sgc-core",
+      "source": "./plugins/sgc-core",
+      "description": "Base obligatoria: estándares agnósticos de stack (core-*), checklist CORE-* y el gate de cierre (Definition of Done). Instálalo en todo repo."
+    },
+    {
+      "name": "sgc-laravel",
+      "source": "./plugins/sgc-laravel",
+      "description": "Convenciones de Laravel 12 / PHP 8.4 + multi-tenant, checklist LAR-* y sus revisores. Instala sgc-core automáticamente."
+    },
+    {
+      "name": "sgc-nestjs",
+      "source": "./plugins/sgc-nestjs",
+      "description": "Convenciones de NestJS / TypeScript, checklist NEST-* y su revisor. Instala sgc-core automáticamente."
+    },
+    {
       "name": "sgc-mx-toolkit",
       "source": "./plugins/sgc-mx-toolkit",
-      "description": "Estándares SGC-MX (core + Laravel + multi-tenant) como skills, subagente dod-reviewer y hook de cierre automático."
+      "description": "Bundle de transición (antes: el plugin único). Instala sgc-core + sgc-laravel + sgc-nestjs. Para repos nuevos, instala solo lo que uses."
     }
   ]
 }

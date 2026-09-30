@@ -1,0 +1,13 @@
+# CLAUDE.md de proyecto (raíz de un repo NestJS)
+# Objetivo: quedar CORTO. La sustancia vive en los skills, que se cargan solo
+# cuando el contexto de la tarea los dispara — no todo el tiempo.
+
+Este es un backend NestJS / TypeScript, parte del ecosistema SGC-MX.
+
+- Stack: NestJS <versión>, TypeScript en modo `strict`, ORM: <TypeORM | Prisma>.
+- Comandos: `npm run test`, `npm run lint`, `npm run build`.
+- Plugins: `sgc-nestjs` (instala `sgc-core` como dependencia). Las convenciones de
+  código están en las skills `nestjs-*` y `core-*`, que se disparan solas según lo que
+  se esté tocando (DTO, service, repository, módulo, interfaz).
+- Cierre de tareas: el gate de `sgc-core` exige la aprobación de
+  `sgc-nestjs:dod-reviewer` contra CORE-* + NEST-*.

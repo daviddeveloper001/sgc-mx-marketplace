@@ -15,7 +15,7 @@ Principio universal, independiente del framework: el punto de entrada de una req
 ## Cómo aplicar esto por stack
 Este skill define el principio. La convención concreta de implementación (nombres de carpeta, límites de líneas, herramientas de validación de forma) vive en el skill específico del stack:
 - Laravel → ver `laravel-thin-controllers` (Form Requests, `App\Services\...`, límite de 15 líneas).
-- NestJS → (pendiente de escribir: DTOs + `class-validator` en el controller, lógica en un `*.service.ts` inyectado).
+- NestJS → ver `nestjs-dtos` (DTOs + `class-validator` en el controller) y la lógica en un `*.service.ts` inyectado; los fallos esperados, con `nestjs-either-pattern`.
 
 ## Checklist rápido antes de cerrar la tarea
 - ¿El controlador/handler tocado tiene más de una responsabilidad además de recibir y despachar?
